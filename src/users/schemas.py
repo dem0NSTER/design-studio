@@ -1,18 +1,18 @@
 from pydantic import BaseModel
-from works.schemas import WorkAll
+from works.schemas import WorkAllDTO
 
 
-class Admin(BaseModel):
+class AdminDTO(BaseModel):
     id: int
     name: str
     is_main_admin: bool = False
 
 
-class Designer(BaseModel):
+class DesignerDTO(BaseModel):
     id: int
     name: str
     payment: str
 
 
-class DesingerWithWorks(Designer):
-    works: list["WorkAll"]
+class DesingerWithWorksDTO(DesignerDTO):
+    works: list["WorkAllDTO"]

@@ -1,5 +1,9 @@
 from fastapi import APIRouter
-from users.schemas import Designer, Admin
+from sqlalchemy import insert
+
+from users.schemas import DesignerDTO, AdminDTO
+from database import session_maker
+from users.models import Designer
 
 router = APIRouter(
     prefix='/users',
@@ -14,10 +18,34 @@ async def index():
 
 
 @router.post('/add_designer')
-async def add_designer(designer: Designer):
-    pass
+async def add_designer(designer: DesignerDTO):
+    try:
+        async with session_maker() as session:
+            stmt = (
+                insert(Designer)
+                .values(**designer.dict())
+            )
+
+            await session.execute(stmt)
+            await session.commit()
+
+            response = {
+                'status': 'success',
+                'message': None,
+                'data': designer
+            }
+
+            return response
+    except Exception as e:
+        response = {
+            'status': 'error',
+            'message': str(e),
+            'data': None
+        }
+
+        return response
 
 
 @router.post('/add_admin')
-async def add_admin(admin: Admin):
+async def add_admin(admin: AdminDTO):
     pass

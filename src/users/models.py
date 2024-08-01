@@ -2,7 +2,6 @@ from sqlalchemy.orm import Mapped, relationship
 
 from database import Base, id
 
-
 from works.models import *
 
 

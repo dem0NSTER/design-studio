@@ -10,8 +10,8 @@ URL_DB = db_settings.async_link_to_connect
 engine = create_async_engine(url=URL_DB)
 session_maker = async_sessionmaker(engine)
 
-
 id = Annotated[int, mapped_column(primary_key=True)]
+
 
 class Base(DeclarativeBase):
     repr_collums_count = 3
