@@ -17,6 +17,6 @@ class Work(Base):
     design_is_agreed: Mapped[bool | None]
     value_is_agreed: Mapped[bool | None]
     date_of_payment: Mapped[date | None]
-    designer_id: Mapped[int] = mapped_column(ForeignKey('designers.id'))
+    designer_id: Mapped[int] = mapped_column(ForeignKey('designers.id', ondelete='CASCADE'))
 
     designer: Mapped["Designer"] = relationship(back_populates='works')

@@ -10,7 +10,7 @@ class Admin(Base):
 
     id: Mapped[id]
     name: Mapped[str]
-    is_main_admin: Mapped[bool] = False
+    is_main_admin: Mapped[bool] = mapped_column(default=False)
 
 
 class Designer(Base):
