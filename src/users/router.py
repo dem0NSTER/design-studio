@@ -5,7 +5,7 @@ from sqlalchemy import select
 from database import session_maker
 from users.models import Designer, Admin
 from users.schemas import DesignerDTO, AdminDTO
-from utils import AdminNotFound, DesignerNotFound, check_admin, AdminNotMain, check_designer
+from utils import ApiException, check_admin, AdminNotMain, check_designer
 
 router = APIRouter(
     prefix='/users',
@@ -17,6 +17,44 @@ router = APIRouter(
 @router.get('/')
 async def index():
     return {'message': 'router for work with users'}
+
+
+@router.get('/select_all_users')
+async def select_all_users():
+    try:
+        async with session_maker() as session:
+            query = (
+                select(Admin.id)
+            )
+            admins = await session.execute(query)
+
+            query = (
+                select(Designer.id)
+            )
+            designers = await session.execute(query)
+
+            result_admins = admins.scalars().all()
+            result_designers = designers.scalars().all()
+
+            result = {
+                'admins': result_admins,
+                'designers': result_designers
+            }
+
+            response = {
+                'status': 'success',
+                'message': None,
+                'data': result
+            }
+            return response
+
+    except Exception as e:
+        response = {
+            'status': 'error',
+            'message': str(e),
+            'data': None
+        }
+        return response
 
 
 @router.post('/add_designer')
@@ -41,10 +79,10 @@ async def add_designer(designer: DesignerDTO, admin_id: int):
 
             return response
 
-    except AdminNotFound:
+    except ApiException as e:
         response = {
             'status': 'error',
-            'message': 'admin not found',
+            'message': str(e),
             'data': None
         }
         return response
@@ -89,19 +127,10 @@ async def delete_designer(designer_id: int, admin_id: int):
 
             return response
 
-    except AdminNotFound:
+    except ApiException as e:
         response = {
             'status': 'error',
-            'message': 'admin not found',
-            'data': None
-        }
-
-        return response
-
-    except DesignerNotFound:
-        response = {
-            'status': 'error',
-            'message': 'designer not found',
+            'message': str(e),
             'data': None
         }
 
@@ -144,19 +173,10 @@ async def add_admin(new_admin: AdminDTO, id_main_admin: int):
 
             return response
 
-    except AdminNotFound:
+    except ApiException as e:
         response = {
             'status': 'error',
-            'message': 'admin not found',
-            'data': None
-        }
-
-        return response
-
-    except AdminNotMain:
-        response = {
-            'status': 'error',
-            'message': 'admin is not main',
+            'message': str(e),
             'data': None
         }
 
@@ -190,33 +210,24 @@ async def delete_admin(admin_id: int, id_main_admin: int):
 
             response = {
                 'status': 'success',
-                'message': f'admin deleted',
+                'message': 'admin deleted',
                 'data': None
             }
             return response
 
-    except AdminNotFound:
-        response = {
-            'status': 'error',
-            'message': 'admin not found',
-            'data': None
-        }
-
-        return response
-
-    except AdminNotMain:
-        response = {
-            'status': 'error',
-            'message': 'admin is not main',
-            'data': None
-        }
-
-        return response
-
-    except Exception as e:
+    except ApiException as e:
         response = {
             'status': 'error',
             'message': str(e),
+            'data': None
+        }
+        return response
+
+    except Exception as e:
+        print(e)
+        response = {
+            'status': 'error',
+            'message': 'server error',
             'data': None
         }
 

@@ -66,17 +66,25 @@ def write_log(e: str, __name_: str, func_name: str) -> None:
         file.write(f"{datetime.utcnow().strftime('%Y-%m-%d %H:%M')}: (func: {__name_}: {func_name}) {e};\n\n")
 
 
-class AdminNotFound(Exception):
+class ApiException(Exception):
     pass
 
 
-class DesignerNotFound(Exception):
-    pass
+class AdminNotFound(ApiException):
+    def __str__(self):
+        return "admin not found"
 
 
-class AdminNotMain(Exception):
-    pass
+class DesignerNotFound(ApiException):
+    def __str__(self):
+        return "designer not found"
 
 
-class WorkNotFound(Exception):
-    pass
+class AdminNotMain(ApiException):
+    def __str__(self):
+        return "admin is not main"
+
+
+class WorkNotFound(ApiException):
+    def __str__(self):
+        return "work not found"

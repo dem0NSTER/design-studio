@@ -4,7 +4,7 @@ from fastapi import APIRouter
 from sqlalchemy import insert, select, and_, update, delete
 
 from database import session_maker
-from utils import check_designer, DesignerNotFound, check_work, WorkNotFound
+from utils import check_designer, ApiException, check_work
 from works.models import Work
 from works.schemas import AddworkfromdisignerDTO
 
@@ -41,10 +41,10 @@ async def add_work(work: AddworkfromdisignerDTO):
 
         return response
 
-    except DesignerNotFound:
+    except ApiException as e:
         response = {
             'status': 'error',
-            'message': 'designer not found',
+            'message': str(e),
             'data': None
         }
         return response
@@ -79,10 +79,10 @@ async def delete_work(work_id: int):
 
         return response
 
-    except WorkNotFound:
+    except ApiException as e:
         response = {
             'status': 'error',
-            'message': 'work not found',
+            'message': str(e),
             'data': None
         }
 
@@ -120,10 +120,10 @@ async def get_works(designer_id: int):
 
         return response
 
-    except DesignerNotFound:
+    except ApiException as e:
         response = {
             'status': 'error',
-            'message': 'designer not found',
+            'message': str(e),
             'data': None
         }
 
@@ -163,10 +163,10 @@ async def set_date_of_payment(work_id: int):
 
         return response
 
-    except WorkNotFound:
+    except ApiException as e:
         response = {
             'status': 'error',
-            'message': 'work not found',
+            'message': str(e),
             'data': None
         }
         return response
@@ -203,10 +203,10 @@ async def set_design_is_agree(work_id: int):
 
             return response
 
-    except WorkNotFound:
+    except ApiException as e:
         response = {
             'status': 'error',
-            'message': 'work not found',
+            'message': str(e),
             'data': None
         }
         return response
@@ -243,10 +243,10 @@ async def set_value_is_agree(work_id: int):
 
             return response
 
-    except WorkNotFound:
+    except ApiException as e:
         response = {
             'status': 'error',
-            'message': 'work not found',
+            'message': str(e),
             'data': None
         }
         return response
