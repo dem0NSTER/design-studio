@@ -1,11 +1,13 @@
 from fastapi import APIRouter
-from sqlalchemy import insert, delete
+from sqlalchemy import insert, delete, update
 from sqlalchemy import select
 
 from database import session_maker
 from users.models import Designer, Admin
 from users.schemas import DesignerDTO, AdminDTO
 from utils import ApiException, check_admin, AdminNotMain, check_designer
+
+from fastapi_cache.decorator import cache
 
 router = APIRouter(
     prefix='/users',
@@ -20,6 +22,7 @@ async def index():
 
 
 @router.get('/select_all_users')
+# @cache(60)
 async def select_all_users():
     try:
         async with session_maker() as session:
@@ -33,12 +36,21 @@ async def select_all_users():
             )
             designers = await session.execute(query)
 
+            query = (
+                select(Admin.id)
+                .where(Admin.is_main_admin == True)
+            )
+
+            main_admins = await session.execute(query)
+
             result_admins = admins.scalars().all()
             result_designers = designers.scalars().all()
+            results_main_admins = main_admins.scalars().all()
 
             result = {
                 'admins': result_admins,
-                'designers': result_designers
+                'designers': result_designers,
+                'main_admins': results_main_admins
             }
 
             response = {
@@ -47,6 +59,44 @@ async def select_all_users():
                 'data': result
             }
             return response
+
+    except Exception as e:
+        response = {
+            'status': 'error',
+            'message': str(e),
+            'data': None
+        }
+        return response
+
+
+@router.get('/select_main_admins')
+# @cache(60)
+async def select_main_admins():
+    try:
+        async with session_maker() as session:
+            query = (
+                select(Admin)
+                .where(Admin.is_main_admin == True)
+            )
+
+            result = await session.execute(query)
+            admins = result.scalars().all()
+            ids = [admin.id for admin in admins]
+
+            response = {
+                'status': 'success',
+                'message': None,
+                'data': ids
+            }
+            return response
+
+    except ApiException as e:
+        response = {
+            'status': 'error',
+            'message': str(e),
+            'data': None
+        }
+        return response
 
     except Exception as e:
         response = {
@@ -143,6 +193,43 @@ async def delete_designer(designer_id: int, admin_id: int):
             'data': None
         }
 
+        return response
+
+
+@router.post('/change_payment')
+async def change_payment(designer_id: int, new_payment: str):
+    try:
+        async with session_maker() as session:
+            stmt = (
+                update(Designer)
+                .where(Designer.id == designer_id)
+                .values(payment=new_payment)
+            )
+
+            await session.execute(stmt)
+            await session.commit()
+
+            response = {
+                'status': 'success',
+                'message': 'payment changed',
+                'data': None
+            }
+            return response
+
+    except ApiException as e:
+        response = {
+            'status': 'error',
+            'message': str(e),
+            'data': None
+        }
+        return response
+
+    except Exception as e:
+        response = {
+            'status': 'error',
+            'message': str(e),
+            'data': None
+        }
         return response
 
 
