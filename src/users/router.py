@@ -7,8 +7,6 @@ from users.models import Designer, Admin
 from users.schemas import DesignerDTO, AdminDTO
 from utils import ApiException, check_admin, AdminNotMain, check_designer
 
-from fastapi_cache.decorator import cache
-
 router = APIRouter(
     prefix='/users',
     tags=['users'],
@@ -19,6 +17,77 @@ router = APIRouter(
 @router.get('/')
 async def index():
     return {'message': 'router for work with users'}
+
+
+@router.get('/select_all_designers')
+async def select_all_designers():
+    try:
+        async with session_maker() as session:
+            query = (
+                select(Designer)
+            )
+            results = await session.execute(query)
+
+            result = results.scalars().all()
+
+            response = {
+                'status': 'success',
+                'message': None,
+                'data': result
+            }
+            return response
+
+    except ApiException as e:
+        response = {
+            'status': 'error',
+            'message': str(e),
+            'data': None
+        }
+        return response
+
+    except Exception as e:
+        response = {
+            'status': 'error',
+            'message': str(e),
+            'data': None
+        }
+        return response
+
+
+@router.get('/select_all_admins')
+async def select_all_admins():
+    try:
+        async with session_maker() as session:
+            query = (
+                select(Admin)
+                .where(Admin.is_main_admin == False)
+            )
+
+            result = await session.execute(query)
+            admins = result.scalars().all()
+
+            response = {
+                'status': 'success',
+                'message': None,
+                'data': admins
+            }
+            return response
+
+    except ApiException as e:
+        response = {
+            'status': 'error',
+            'message': str(e),
+            'data': None
+        }
+        return response
+
+    except Exception as e:
+        response = {
+            'status': 'error',
+            'message': str(e),
+            'data': None
+        }
+        return response
 
 
 @router.get('/select_all_users')
