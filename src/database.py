@@ -1,5 +1,7 @@
 from typing import Annotated
 
+from sqlalchemy import BIGINT
+
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase, mapped_column
 
@@ -10,7 +12,7 @@ URL_DB = db_settings.async_link_to_connect
 engine = create_async_engine(url=URL_DB)
 session_maker = async_sessionmaker(engine)
 
-id = Annotated[int, mapped_column(primary_key=True)]
+id = Annotated[int, mapped_column(BIGINT, primary_key=True)]
 
 
 class Base(DeclarativeBase):
